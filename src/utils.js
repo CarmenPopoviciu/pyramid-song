@@ -39,9 +39,9 @@ export function isMobile() {
 }
 
 function setDatGuiPropertyCss(propertyText, liCssString, spanCssString = '') {
-  var spans = document.getElementsByClassName('property-name');
-  for (var i = 0; i < spans.length; i++) {
-    var text = spans[i].textContent || spans[i].innerText;
+  const spans = document.getElementsByClassName('property-name');
+  for (let i = 0; i < spans.length; i++) {
+    let text = spans[i].textContent || spans[i].innerText;
     if (text == propertyText) {
       spans[i].parentNode.parentNode.style = liCssString;
       if (spanCssString !== '') {

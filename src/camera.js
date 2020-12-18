@@ -17,8 +17,17 @@
 import * as posenet from '@tensorflow-models/posenet';
 import dat from 'dat.gui';
 import Stats from 'stats.js';
+import {
+  drawBoundingBox,
+  drawKeypoints,
+  drawSkeleton,
+  isMobile,
+  toggleLoadingUI,
+  tryResNetButtonName,
+  tryResNetButtonText,
+  updateTryResNetButtonDatGuiCss,
+} from './utils';
 
-import {drawBoundingBox, drawKeypoints, drawSkeleton, isMobile, toggleLoadingUI, tryResNetButtonName, tryResNetButtonText, updateTryResNetButtonDatGuiCss} from './utils';
 
 const videoWidth = 600;
 const videoHeight = 500;
@@ -80,7 +89,7 @@ const guiState = {
     outputStride: defaultMobileNetStride,
     inputResolution: defaultMobileNetInputResolution,
     multiplier: defaultMobileNetMultiplier,
-    quantBytes: defaultQuantBytes
+    quantBytes: defaultQuantBytes,
   },
   singlePoseDetection: {
     minPoseConfidence: 0.1,
@@ -115,7 +124,7 @@ function setupGui(cameras, net) {
 
   let architectureController = null;
   guiState[tryResNetButtonName] = function() {
-    architectureController.setValue('ResNet50')
+    architectureController.setValue('ResNet50');
   };
   gui.add(guiState, tryResNetButtonName).name(tryResNetButtonText);
   updateTryResNetButtonDatGuiCss();
@@ -215,7 +224,8 @@ function setupGui(cameras, net) {
           [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]);
       updateGuiOutputStride(defaultMobileNetStride, [8, 16]);
       updateGuiMultiplier(defaultMobileNetMultiplier, [0.50, 0.75, 1.0]);
-    } else {  // guiState.input.architecture === "ResNet50"
+    } else {
+      // guiState.input.architecture === "ResNet50"
       updateGuiInputResolution(
           defaultResNetInputResolution,
           [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]);
@@ -279,7 +289,7 @@ function setupGui(cameras, net) {
  * Sets up a frames per second panel on the top-left of the window
  */
 function setupFPS() {
-  stats.showPanel(0);  // 0: fps, 1: ms, 2: mb, 3+: custom
+  stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
   document.getElementById('main').appendChild(stats.dom);
 }
 
@@ -324,7 +334,7 @@ function detectPoseInRealTime(video, net) {
         outputStride: guiState.outputStride,
         inputResolution: guiState.inputResolution,
         multiplier: +guiState.changeToMultiplier,
-        quantBytes: guiState.quantBytes
+        quantBytes: guiState.quantBytes,
       });
       toggleLoadingUI(false);
       guiState.multiplier = +guiState.changeToMultiplier;
@@ -340,7 +350,7 @@ function detectPoseInRealTime(video, net) {
         outputStride: +guiState.changeToOutputStride,
         inputResolution: guiState.inputResolution,
         multiplier: guiState.multiplier,
-        quantBytes: guiState.quantBytes
+        quantBytes: guiState.quantBytes,
       });
       toggleLoadingUI(false);
       guiState.outputStride = +guiState.changeToOutputStride;
@@ -356,7 +366,7 @@ function detectPoseInRealTime(video, net) {
         outputStride: guiState.outputStride,
         inputResolution: +guiState.changeToInputResolution,
         multiplier: guiState.multiplier,
-        quantBytes: guiState.quantBytes
+        quantBytes: guiState.quantBytes,
       });
       toggleLoadingUI(false);
       guiState.inputResolution = +guiState.changeToInputResolution;
@@ -372,7 +382,7 @@ function detectPoseInRealTime(video, net) {
         outputStride: guiState.outputStride,
         inputResolution: guiState.inputResolution,
         multiplier: guiState.multiplier,
-        quantBytes: guiState.changeToQuantBytes
+        quantBytes: guiState.changeToQuantBytes,
       });
       toggleLoadingUI(false);
       guiState.quantBytes = guiState.changeToQuantBytes;
@@ -389,22 +399,22 @@ function detectPoseInRealTime(video, net) {
       case 'single-pose':
         const pose = await guiState.net.estimatePoses(video, {
           flipHorizontal: flipPoseHorizontal,
-          decodingMethod: 'single-person'
+          decodingMethod: 'single-person',
         });
         poses = poses.concat(pose);
         minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
         minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
         break;
       case 'multi-pose':
-        let all_poses = await guiState.net.estimatePoses(video, {
+        let allPoses = await guiState.net.estimatePoses(video, {
           flipHorizontal: flipPoseHorizontal,
           decodingMethod: 'multi-person',
           maxDetections: guiState.multiPoseDetection.maxPoseDetections,
           scoreThreshold: guiState.multiPoseDetection.minPartConfidence,
-          nmsRadius: guiState.multiPoseDetection.nmsRadius
+          nmsRadius: guiState.multiPoseDetection.nmsRadius,
         });
 
-        poses = poses.concat(all_poses);
+        poses = poses.concat(allPoses);
         minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
         minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
         break;
@@ -457,7 +467,7 @@ export async function bindPage() {
     outputStride: guiState.input.outputStride,
     inputResolution: guiState.input.inputResolution,
     multiplier: guiState.input.multiplier,
-    quantBytes: guiState.input.quantBytes
+    quantBytes: guiState.input.quantBytes,
   });
   toggleLoadingUI(false);
 
