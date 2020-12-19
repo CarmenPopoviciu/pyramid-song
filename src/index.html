@@ -4,6 +4,15 @@
 <head>
     <title>PoseNet - Camera Feed Demo</title>
     <style>
+        #video {
+            /* flip video image */
+            transform: scaleX(-1);
+        }
+
+        #output {
+            background-color: blue;
+        }
+
         .footer {
             position: fixed;
             left: 0;
@@ -84,9 +93,9 @@
         <div class="sk-spinner sk-spinner-pulse"></div>
     </div>
     <div id='main' style='display:none'>
-        <video id="video" playsinline style="display: none;">
+        <video id="video" playsinline>
         </video>
-        <canvas id="output" />
+        <canvas id="output" width=600 height=500/>
     </div>
     <div class="footer">
         <div class="footer-text">

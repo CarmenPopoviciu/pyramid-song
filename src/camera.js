@@ -28,6 +28,15 @@ import {
   updateTryResNetButtonDatGuiCss,
 } from './utils';
 
+const ARCHITECTURE = {
+  mobNet: 'MobileNetV1',
+  resNet: 'ResNet50',
+};
+
+const ALGORITHM = {
+  singlePose: 'single-pose',
+  multiPose: 'multi-pose',
+};
 
 const videoWidth = 600;
 const videoHeight = 500;
@@ -83,12 +92,12 @@ const defaultResNetStride = 32;
 const defaultResNetInputResolution = 250;
 
 const guiState = {
-  algorithm: 'multi-pose',
+  algorithm: ALGORITHM.singlePose,
   input: {
-    architecture: 'MobileNetV1',
-    outputStride: defaultMobileNetStride,
-    inputResolution: defaultMobileNetInputResolution,
-    multiplier: defaultMobileNetMultiplier,
+    architecture: ARCHITECTURE.resNet,
+    outputStride: defaultResNetStride,
+    inputResolution: defaultResNetInputResolution,
+    multiplier: defaultResNetMultiplier,
     quantBytes: defaultQuantBytes,
   },
   singlePoseDetection: {
@@ -102,7 +111,7 @@ const guiState = {
     nmsRadius: 30.0,
   },
   output: {
-    showVideo: true,
+    showVideo: false,
     showSkeleton: true,
     showPoints: true,
     showBoundingBox: false,
@@ -124,7 +133,7 @@ function setupGui(cameras, net) {
 
   let architectureController = null;
   guiState[tryResNetButtonName] = function() {
-    architectureController.setValue('ResNet50');
+    architectureController.setValue(ARCHITECTURE.resNet);
   };
   gui.add(guiState, tryResNetButtonName).name(tryResNetButtonText);
   updateTryResNetButtonDatGuiCss();
@@ -133,7 +142,7 @@ function setupGui(cameras, net) {
   // person to be in the frame or results will be innaccurate. Multi-pose works
   // for more than 1 person
   const algorithmController =
-      gui.add(guiState, 'algorithm', ['single-pose', 'multi-pose']);
+      gui.add(guiState, 'algorithm', [ALGORITHM.singlePose, ALGORITHM.multiPose]);
 
   // The input parameters have the most effect on accuracy and speed of the
   // network
@@ -142,7 +151,7 @@ function setupGui(cameras, net) {
   // accuracy. 1.01 is the largest, but will be the slowest. 0.50 is the
   // fastest, but least accurate.
   architectureController =
-      input.add(guiState.input, 'architecture', ['MobileNetV1', 'ResNet50']);
+      input.add(guiState.input, 'architecture', [ARCHITECTURE.mobNet, ARCHITECTURE.resNet]);
   guiState.architecture = guiState.input.architecture;
   // Input resolution:  Internally, this parameter affects the height and width
   // of the layers in the neural network. The higher the value of the input
@@ -218,7 +227,7 @@ function setupGui(cameras, net) {
   }
 
   function updateGui() {
-    if (guiState.input.architecture === 'MobileNetV1') {
+    if (guiState.input.architecture === ARCHITECTURE.mobNet) {
       updateGuiInputResolution(
           defaultMobileNetInputResolution,
           [200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800]);
@@ -273,11 +282,11 @@ function setupGui(cameras, net) {
 
   algorithmController.onChange(function(value) {
     switch (guiState.algorithm) {
-      case 'single-pose':
+      case ALGORITHM.singlePose:
         multi.close();
         single.open();
         break;
-      case 'multi-pose':
+      case ALGORITHM.multiPose:
         single.close();
         multi.open();
         break;
@@ -396,7 +405,7 @@ function detectPoseInRealTime(video, net) {
     let minPoseConfidence;
     let minPartConfidence;
     switch (guiState.algorithm) {
-      case 'single-pose':
+      case ALGORITHM.singlePose:
         const pose = await guiState.net.estimatePoses(video, {
           flipHorizontal: flipPoseHorizontal,
           decodingMethod: 'single-person',
@@ -405,7 +414,7 @@ function detectPoseInRealTime(video, net) {
         minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
         minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
         break;
-      case 'multi-pose':
+      case ALGORITHM.multiPose:
         let allPoses = await guiState.net.estimatePoses(video, {
           flipHorizontal: flipPoseHorizontal,
           decodingMethod: 'multi-person',
